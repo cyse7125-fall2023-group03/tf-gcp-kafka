@@ -196,8 +196,8 @@ resource "google_container_node_pool" "my_node_pool" {
     auto_upgrade = true
   }
    autoscaling {
-    min_node_count = 1
-    max_node_count = 10
+    min_node_count = 3
+    max_node_count = 6
   }
   node_config {
     machine_type = "e2-small"
@@ -215,7 +215,7 @@ resource "google_container_node_pool" "my_node_pool" {
 
 resource "google_compute_instance" "bastion" {
   name         = "bastion"
-  machine_type = "f1-micro"
+  machine_type = "e2-medium"
   zone         = var.zone
   project = google_project.project_1.project_id
   boot_disk {
@@ -248,6 +248,25 @@ resource "google_compute_instance" "bastion" {
   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
   chmod 700 get_helm.sh
   ./get_helm.sh
+
+  sudo apt install make
+
+  wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz
+  sudo tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz
+  export PATH=$PATH:/usr/local/go/bin
+  export GOPATH=$HOME/go
+  export PATH=$PATH:$GOPATH/bin
+  source ~/.bashrc 
+
+  sudo apt update
+  sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt update
+  sudo apt install -y docker-ce docker-ce-cli containerd.io
+  sudo systemctl enable docker
+  sudo systemctl start docker
+
 
   alias k="kubectl"
   gcloud container clusters get-credentials my-vpc-native-cluster --region us-east1 --internal-ip
