@@ -200,8 +200,8 @@ resource "google_container_node_pool" "my_node_pool" {
     max_node_count = 6
   }
   node_config {
-    machine_type = "e2-small"
-    disk_size_gb = 20 
+    machine_type = "e2-medium"
+    disk_size_gb = 30 
     image_type = "COS_CONTAINERD" # Container-optimized OS 
     service_account = google_service_account.kubernetes.email
     oauth_scopes = [
@@ -249,7 +249,11 @@ resource "google_compute_instance" "bastion" {
   chmod 700 get_helm.sh
   ./get_helm.sh
 
+  
   sudo apt install make
+
+  helm repo add istio https://istio-release.storage.googleapis.com/charts
+  helm repo update
 
   wget https://golang.org/dl/go1.21.4.linux-amd64.tar.gz
   sudo tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz
